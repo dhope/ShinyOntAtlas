@@ -29,15 +29,23 @@ navbarPage("Interactive map", id="nav",
                                       width = 330, height = "auto",
                                       
                                       h2("PC explorer"),
-                                      
+                                      selectInput('pointsize',label = "Point size",
+                                                  choices = c("Big"=50, "Medium"=15, "Small"=2.5)),
+                                      selectInput(inputId = "sqsum",label =  "Include Atlas frame summary",
+                                                  c("Day & Year Summaries"="dayyear", 
+                                                  "Block & Square Sumaries"='blsq')),
                                       selectInput("color", "Color", vars),
-                                      selectInput("size", "Size", vars, selected = "year"),
+                                      # selectInput("size", "Size", vars, selected = "year"),
                                       # conditionalPanel("input.color == 'superzip' || input.size == 'superzip'",
                                       #                  # Only prompt for threshold when coloring or sizing by superzip
                                       #                  numericInput("threshold", "SuperZIP threshold (top n percentile)", 5)
+                                      conditionalPanel("input.sqsum == 'dayyear'",
                                       plotOutput("time_day", height = 250),
-                                      plotOutput("year", height = 200)
+                                      plotOutput("year", height = 200)),
+                                      conditionalPanel("input.sqsum=='blsq'", 
+                                                       plotOutput("blocks") )
                         ),
+                        
                         
                         tags$div(id="cite",
                                  'Data compiled for ', tags$em('Ontario Breeding Bird Atlas'), ' by Birds Canada.'

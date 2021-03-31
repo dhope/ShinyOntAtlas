@@ -2,10 +2,11 @@ library(sf)
 library(dplyr)
 library(tidyr)
 
+
+ont.proj <- 3161
 pc.sf <- readr::read_rds(here::here("data/rds/point_counts_preped.rds")) %>% 
   mutate(doy = lubridate::yday(ymd),
-         m2s = round(min_tosunrise/60)*60) 
-ont.proj <- 3161
+         m2s = round(min_tosunrise/60)*60)
 aoi <- st_bbox(pc.sf) %>% st_as_sfc(.)
 blocks <- st_read(here::here("data/spatial/OBBA/obba2_blocks.shp"), quiet = T) %>% 
   st_transform(ont.proj, partial=F, check=T) %>% 
@@ -13,6 +14,10 @@ blocks <- st_read(here::here("data/spatial/OBBA/obba2_blocks.shp"), quiet = T) %
 obba_sq <-
   st_read(quiet=T,here::here("data/spatial/OBBA/obba2_squares.shp")) %>%
   st_transform(ont.proj)  %>% st_filter(aoi)
+
+
+pc.sf <-  pc.sf %>% 
+  st_join(obba_sq)
 
 # fullPC <- readr::read_tsv(here::here("data/onatlas_pt_cnt_data.txt")) %>%
 #   filter(point_count_id %in% pc.sf$point_count_id) %>% 
