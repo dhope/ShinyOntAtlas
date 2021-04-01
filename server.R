@@ -207,6 +207,27 @@ function(input, output, session) {
   })
   
 
+  
+  output$sppHist <- renderPlot({
+    d <- filter(fullPC, 
+                species_code %in% input$species)
+    if(nrow(d)==0){return(NULL)}
+    # if(input$species=="")d <- fullPC
+      ggplot(d,
+             aes(counts)) +
+          geom_histogram(binwidth = 1) +
+          facet_wrap(~species_code, scales='free') +
+          labs(x = "Count", y = "Number of PC")}  )
+  
+  
+  
+    tst_mod <- mgcv::gam(counts ~ te(X,Y), data = tst_spp)
+    rdf <- raster::as.data.frame(r,xy=T ) %>% 
+      rename(X=x, Y=y)
+    rdf[c("r_pred", "se")] <- predict(tst_mod, newdata=rdf, se.fit = T)
+    
+    ggplot(rdf, aes(X,Y, fill = r_pred)) +
+      geom_raster()
   #     output$blocks <- renderPlot(
   #         {
   # dat_blocks <- pc.sf %>%

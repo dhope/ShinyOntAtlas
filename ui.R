@@ -51,7 +51,21 @@ navbarPage("Interactive map", id="nav",
                                  'Data compiled for ', tags$em('Ontario Breeding Bird Atlas'), ' by Birds Canada.'
                         )
                     )
-           ))#,
+           ),
+tabPanel("Species Explorer",
+  sidebarLayout(
+    sidebarPanel = sidebarPanel("Settings",
+                                selectInput('species', "Species",
+                                            c("All"="",
+                                              structure(full_spp$Species_ID, names = full_spp$English_Name)), 
+                                            multiple = T)
+                                ),
+    mainPanel = mainPanel("Results",
+                          plotOutput("sppHist", height = 200)
+                          )
+  )
+)
+)
            
            # tabPanel("Data explorer",
            #          fluidRow(

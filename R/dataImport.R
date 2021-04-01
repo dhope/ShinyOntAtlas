@@ -19,18 +19,23 @@ obba_sq <-
 pc.sf <-  pc.sf %>% 
   st_join(obba_sq)
 
-# fullPC <- readr::read_tsv(here::here("data/onatlas_pt_cnt_data.txt")) %>%
-#   filter(point_count_id %in% pc.sf$point_count_id) %>% 
-#   replace_na(list(count_near=0, count_far=0))  %>% 
-#   complete(point_count_id, species_code, fill=list(count_near=0, count_far=0))  %>% 
-#   mutate(counts = count_near + count_far) %>%
-#   group_by(point_count_id) %>% 
-#   mutate(all_spp_count = sum(counts, na.rm=T)) %>% ungroup %>% 
-#   # filter(all_spp_count>0) %>% 
-#   dplyr::select(-all_spp_count) %>% ungroup %>% 
-#   left_join(st_drop_geometry(pc.sf), by = "point_count_id")
-# 
-# 
+fullPC <- readr::read_tsv(here::here("data/onatlas_pt_cnt_data.txt")) %>%
+  filter(point_count_id %in% pc.sf$point_count_id) %>%
+  replace_na(list(count_near=0, count_far=0))  %>%
+  complete(point_count_id, species_code, fill=list(count_near=0, count_far=0))  %>%
+  mutate(counts = count_near + count_far) %>%
+  group_by(point_count_id) %>%
+  mutate(all_spp_count = sum(counts, na.rm=T)) %>% ungroup %>%
+  # filter(all_spp_count>0) %>%
+  dplyr::select(-all_spp_count) %>% ungroup %>%
+  left_join(st_drop_geometry(pc.sf), by = "point_count_id")
+
+spp_id <- readr::read_csv(here::here("data/AVIAN_CORE_20210118.csv"), col_types = readr::cols())
+full_spp <- spp_id[spp_id$Full_Species=="Yes",] %>% filter(Species_ID %in% fullPC$species_code)
+
+r <- raster::raster(crs = st_crs(aoi), resolution = 500, ext = raster::extent(as(aoi, "Spatial")))
+
+
 # 
 # summarize_group <- function(.data, ...){
 #   .data %>% 
