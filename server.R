@@ -206,28 +206,42 @@ function(input, output, session) {
       })
   })
   
+  d <-  reactive({filter(fullPC, 
+                       species_code %in% input$species)})
 
-  
   output$sppHist <- renderPlot({
-    d <- filter(fullPC, 
-                species_code %in% input$species)
+
     if(nrow(d)==0){return(NULL)}
     # if(input$species=="")d <- fullPC
       ggplot(d,
              aes(counts)) +
           geom_histogram(binwidth = 1) +
+        scale_y_continuous(trans = scales::log1p_trans(),
+                           breaks = 10^(0:10)) +
           facet_wrap(~species_code, scales='free') +
-          labs(x = "Count", y = "Number of PC")}  )
+        ggthemes::theme_tufte() +
+          labs(x = "Count", y = "Number of Point Counts (log10 scale)")
+      }  )
   
-  
-  
-    tst_mod <- mgcv::gam(counts ~ te(X,Y), data = tst_spp)
-    rdf <- raster::as.data.frame(r,xy=T ) %>% 
-      rename(X=x, Y=y)
-    rdf[c("r_pred", "se")] <- predict(tst_mod, newdata=rdf, se.fit = T)
+  output$spp_map <- renderPlot({
+        d_gr_spp <- d_gr %>% filter(species_code %in% input$species) %>% 
+          left_join(obba_sq, by = "SQUARE_ID") %>% st_as_sf()
+     ggplot(d_gr_spp) + geom_sf(aes(fill = mean_count>0)) +
+       facet_wrap(~species_code) +
+       scale_fill_viridis_d()
     
-    ggplot(rdf, aes(X,Y, fill = r_pred)) +
-      geom_raster()
+  })
+    
+  
+  
+  
+    # tst_mod <- mgcv::gam(counts ~ te(X,Y, k = 50), data = tst_spp)
+    # rdf <- raster::as.data.frame(r,xy=T ) %>% 
+    #   rename(X=x, Y=y)
+    # rdf[c("r_pred", "se")] <- predict(tst_mod, newdata=rdf, se.fit = T)
+    # 
+    # ggplot(rdf, aes(X,Y, fill = se)) +
+    #   geom_raster()
   #     output$blocks <- renderPlot(
   #         {
   # dat_blocks <- pc.sf %>%

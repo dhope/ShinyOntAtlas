@@ -33,8 +33,14 @@ fullPC <- readr::read_tsv(here::here("data/onatlas_pt_cnt_data.txt")) %>%
 spp_id <- readr::read_csv(here::here("data/AVIAN_CORE_20210118.csv"), col_types = readr::cols())
 full_spp <- spp_id[spp_id$Full_Species=="Yes",] %>% filter(Species_ID %in% fullPC$species_code)
 
-r <- raster::raster(crs = st_crs(aoi), resolution = 500, ext = raster::extent(as(aoi, "Spatial")))
+# r <- raster::raster(crs = st_crs(aoi), resolution = 5000, ext = raster::extent(as(aoi, "Spatial")))
 
+d_gr <- fullPC %>% group_by(species_code, SQUARE_ID) %>% 
+  summarize(n=n(),
+            sum_count = sum(counts),
+            mean_count = mean(counts),
+            sd_count = sd(counts),
+            se_count = sd_count/n, .groups = 'drop')
 
 # 
 # summarize_group <- function(.data, ...){
